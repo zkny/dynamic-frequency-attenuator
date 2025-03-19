@@ -2,8 +2,8 @@ desc: Dynamic Frequency Attenuator
 //tags: Dynamic Frequency Attenuator
 //author: ZKNY
 
-slider1:-1<-150,0,0.1>Reduction (dB)
-slider2:0<-64,0,0.1>Threshold (dB)
+slider1:0<0,100,1>Reduction (%)
+slider2:0<-64,0,0.1>Threshold (dB)han
 
 in_pin:left input
 in_pin:right input
@@ -14,12 +14,20 @@ out_pin:right output
 ext_tail_size = -2;
 
 @slider
-  reduction = 2 ^ (slider1 / 6);
+  reduction = slider1 / 100;
   threshold = 10 ^ (slider2 / 20);
 
 @sample
   abs_spl0 = abs(spl0);
   abs_spl1 = abs(spl1);
 
-  abs_spl0 > threshold ? spl0 *= reduction;
-  abs_spl1 > threshold ? spl1 *= reduction;
+  abs_spl0 > threshold ? (
+    excess = abs_spl0 - threshold;
+    spl0 *= 1 - reduction * (excess / abs_spl0);
+  );
+  abs_spl1 > threshold ? (
+    excess = abs_spl1 - threshold;
+    spl1 *= 1 - reduction * (excess / abs_spl1);
+  );
+
+
